@@ -11,53 +11,77 @@ using TrackPlayer.Logic;
 using TrackPlayer.Players;
 
 namespace TrackPlayer
-{
-    class TrackPlayerModule : ReactContextNativeModuleBase
-    {
-        public override string Name => "TrackPlayerModule";
+{ // <- Put the bracket in a new line here to prevent linking errors
 
-        public override IReadOnlyDictionary<string, object> Constants => new Dictionary<string, object> {
-            {"STATE_NONE", (int)MediaPlaybackState.None},
-            {"STATE_PLAYING", (int)MediaPlaybackState.Playing},
-            {"STATE_PAUSED", (int)MediaPlaybackState.Paused},
-            {"STATE_STOPPED", -1}, // Unsupported
-            {"STATE_BUFFERING", (int)MediaPlaybackState.Buffering},
-
-            {"CAPABILITY_PLAY", (int)Capability.Play},
-            {"CAPABILITY_PLAY_FROM_ID", (int)Capability.Unsupported},
-            {"CAPABILITY_PLAY_FROM_SEARCH", (int)Capability.Unsupported},
-            {"CAPABILITY_PAUSE", (int)Capability.Pause},
-            {"CAPABILITY_STOP", (int)Capability.Stop},
-            {"CAPABILITY_SEEK_TO", (int)Capability.Seek},
-            {"CAPABILITY_SKIP", (int)Capability.Unsupported},
-            {"CAPABILITY_SKIP_TO_NEXT", (int)Capability.Next},
-            {"CAPABILITY_SKIP_TO_PREVIOUS", (int)Capability.Previous},
-            {"CAPABILITY_SET_RATING", (int)Capability.Unsupported}
-        };
+    class TrackPlayerModule : ReactContextNativeModuleBase {
 
         private MediaManager manager;
 
-        public TrackPlayerModule(ReactContext reactContext) : base(reactContext)
-        {
+        public TrackPlayerModule(ReactContext reactContext) : base(reactContext) {
 
         }
 
-        public override void OnReactInstanceDispose()
-        {
+        public override string Name {
+            get {
+                return "TrackPlayerModule";
+            }
+        }
+
+        public override IReadOnlyDictionary<string, object> Constants {
+            get {
+                return new Dictionary<string, object> {
+                    {"STATE_NONE", (int)MediaPlaybackState.None},
+                    {"STATE_PLAYING", (int)MediaPlaybackState.Playing},
+                    {"STATE_PAUSED", (int)MediaPlaybackState.Paused},
+                    {"STATE_STOPPED", -1}, // Unsupported
+                    {"STATE_BUFFERING", (int)MediaPlaybackState.Buffering},
+
+                    {"CAPABILITY_PLAY", (int)Capability.Play},
+                    {"CAPABILITY_PLAY_FROM_ID", (int)Capability.Unsupported},
+                    {"CAPABILITY_PLAY_FROM_SEARCH", (int)Capability.Unsupported},
+                    {"CAPABILITY_PAUSE", (int)Capability.Pause},
+                    {"CAPABILITY_STOP", (int)Capability.Stop},
+                    {"CAPABILITY_SEEK_TO", (int)Capability.Seek},
+                    {"CAPABILITY_SKIP", (int)Capability.Unsupported},
+                    {"CAPABILITY_SKIP_TO_NEXT", (int)Capability.Next},
+                    {"CAPABILITY_SKIP_TO_PREVIOUS", (int)Capability.Previous},
+                    {"CAPABILITY_SET_RATING", (int)Capability.Unsupported},
+
+                    // Pitch algorithms is unsupported
+                    {"PITCH_ALGORITHM_LINEAR", 0},
+                    {"PITCH_ALGORITHM_MUSIC", 0},
+                    {"PITCH_ALGORITHM_VOICE", 0},
+
+                    // Rating is unsupported
+                    {"RATING_HEART", 0},
+                    {"RATING_THUMBS_UP_DOWN", 0},
+                    {"RATING_3_STARS", 0},
+                    {"RATING_4_STARS", 0},
+                    {"RATING_5_STARS", 0},
+                    {"RATING_PERCENTAGE", 0},
+
+                    // Cast is unsupported (for now)
+                    {"CAST_NO_DEVICES_AVAILABLE", 0},
+                    {"CAST_NOT_CONNECTED", 1},
+                    {"CAST_CONNECTING", 2},
+                    {"CAST_CONNECTED", 3},
+                    {"CAST_SUPPORT_AVAILABLE", false}
+                };
+            }
+        }
+
+        public override void OnReactInstanceDispose() {
             base.OnReactInstanceDispose();
 
-            if (manager != null)
-            {
+            if(manager != null) {
                 manager.Dispose();
                 manager = null;
             }
         }
 
         [ReactMethod]
-        public void setupPlayer(JObject options, IPromise promise)
-        {
-            if (manager != null)
-            {
+        public void setupPlayer(JObject options, IPromise promise) {
+            if(manager != null) {
                 promise.Resolve(null);
                 return;
             }
@@ -67,58 +91,44 @@ namespace TrackPlayer
         }
 
         [ReactMethod]
-        public void destroy()
-        {
-            if(manager != null)
-            {
+        public void destroy() {
+            if(manager != null) {
                 manager.Dispose();
                 manager = null;
             }
         }
 
         [ReactMethod]
-        public void updateOptions(JObject options, IPromise promise)
-        {
+        public void updateOptions(JObject options) {
             // TODO remove the necessity of setupPlayer
             manager?.UpdateOptions(options);
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void play(IPromise promise)
-        {
+        public void play() {
             manager?.GetPlayer()?.Play();
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void pause(IPromise promise)
-        {
+        public void pause() {
             manager?.GetPlayer()?.Pause();
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void stop(IPromise promise)
-        {
+        public void stop() {
             manager?.GetPlayer()?.Stop();
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void reset(IPromise promise)
-        {
+        public void reset() {
             manager?.GetPlayer()?.Reset();
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void add(JArray array, string insertBeforeId, IPromise promise)
-        {
+        public void add(JArray array, string insertBeforeId, IPromise promise) {
             List<Track> tracks = new List<Track>(array.Count);
 
-            foreach (JObject obj in array)
-            {
+            foreach(JObject obj in array) {
                 tracks.Add(new Track(obj));
             }
 
@@ -126,12 +136,10 @@ namespace TrackPlayer
         }
 
         [ReactMethod]
-        public void remove(JArray array, IPromise promise)
-        {
+        public void remove(JArray array, IPromise promise) {
             List<string> tracks = new List<string>(array.Count);
 
-            foreach (string id in array)
-            {
+            foreach(string id in array) {
                 tracks.Add(id);
             }
 
@@ -139,124 +147,116 @@ namespace TrackPlayer
         }
 
         [ReactMethod]
-        public void skip(string track, IPromise promise)
-        {
+        public void skip(string track, IPromise promise) {
             manager?.GetPlayer()?.Skip(track, promise);
         }
 
         [ReactMethod]
-        public void skipToNext(IPromise promise)
-        {
+        public void skipToNext(IPromise promise) {
             manager?.GetPlayer()?.SkipToNext(promise);
         }
 
         [ReactMethod]
-        public void skipToPrevious(IPromise promise)
-        {
+        public void skipToPrevious(IPromise promise) {
             manager?.GetPlayer()?.SkipToPrevious(promise);
         }
 
         [ReactMethod]
-        public void getCurrentTrack(IPromise promise)
-        {
+        public void getCurrentTrack(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             string id = player.GetCurrentTrack()?.id;
 
-            if (id != null)
+            if(id != null) {
                 promise.Resolve(id);
-            else
+            } else {
                 promise.Reject("track", "No track playing");
+            }
         }
 
         [ReactMethod]
-        public void getTrack(string id, IPromise promise)
-        {
+        public void getTrack(string id, IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             JObject track = player.GetTrack(id)?.ToObject();
 
-            if (track != null)
+            if(track != null) {
                 promise.Resolve(track);
-            else
+            } else {
                 promise.Resolve(null);
+            }
         }
 
         [ReactMethod]
-        public void getVolume(IPromise promise)
-        {
+        public void getVolume(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             promise.Resolve(player.GetVolume());
         }
 
         [ReactMethod]
-        public void setVolume(double volume, IPromise promise)
-        {
+        public void setVolume(double volume) {
             manager?.GetPlayer()?.SetVolume(volume);
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void getRate(IPromise promise)
-        {
+        public void getRate(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             promise.Resolve(player.GetRate());
         }
 
         [ReactMethod]
-        public void setRate(double rate, IPromise promise)
-        {
+        public void setRate(double rate) {
             manager?.GetPlayer()?.SetRate(rate);
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void seekTo(double seconds, IPromise promise)
-        {
+        public void seekTo(double seconds) {
             manager?.GetPlayer()?.SeekTo(seconds);
-            promise.Resolve(null);
         }
 
         [ReactMethod]
-        public void getPosition(IPromise promise)
-        {
+        public void getPosition(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             promise.Resolve(player.GetPosition());
         }
 
         [ReactMethod]
-        public void getBufferedPosition(IPromise promise)
-        {
+        public void getBufferedPosition(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             promise.Resolve(player.GetBufferedPosition());
         }
 
         [ReactMethod]
-        public void getDuration(IPromise promise)
-        {
+        public void getDuration(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             promise.Resolve(player.GetDuration());
         }
 
         [ReactMethod]
-        public void getState(IPromise promise)
-        {
+        public void getState(IPromise promise) {
             Playback player = manager?.GetPlayer();
-            if (Utils.CheckPlayback(player, promise)) return;
+            if(Utils.CheckPlayback(player, promise)) return;
 
             promise.Resolve(player.GetState());
         }
+
+        [ReactMethod]
+        public void getCastState(IPromise promise) {
+            // TODO
+            promise.Resolve(0);
+        }
+
     }
 }

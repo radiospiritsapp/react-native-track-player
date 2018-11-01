@@ -1,18 +1,14 @@
-package com.guichaguri.trackplayer.module;
+package guichaguri.trackplayer.logic;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
+import guichaguri.trackplayer.logic.services.PlayerTask;
 
 /**
- * @author Guichaguri
+ * @author Guilherme Chaguri
  */
-public class MusicEvents extends BroadcastReceiver {
+public class Events {
 
     // Media Control Events
     public static final String BUTTON_PLAY = "remote-play";
@@ -36,20 +32,13 @@ public class MusicEvents extends BroadcastReceiver {
     public static final String PLAYBACK_ERROR = "playback-error";
     public static final String PLAYBACK_UNBIND = "playback-unbind";
 
-    private final ReactContext reactContext;
+    public static void dispatchEvent(Context context, String event, Bundle data) {
+        Intent i = new Intent(context, PlayerTask.class);
 
-    public MusicEvents(ReactContext reactContext) {
-        this.reactContext = reactContext;
-    }
+        if(event != null) i.putExtra(PlayerTask.EVENT_TYPE, event);
+        if(data != null) i.putExtra(PlayerTask.EVENT_DATA, data);
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String event = intent.getStringExtra("event");
-        Bundle data = intent.getBundleExtra("data");
-
-        WritableMap map = data != null ? Arguments.fromBundle(data) : null;
-
-        reactContext.getJSModule(RCTDeviceEventEmitter.class).emit(event, map);
+        context.startService(i);
     }
 
 }
