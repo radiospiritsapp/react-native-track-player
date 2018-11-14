@@ -21,6 +21,7 @@ public class FocusManager implements OnAudioFocusChangeListener {
 
     private boolean paused = false;
     private boolean ducking = false;
+    private boolean isInterrupt = false;
 
     public FocusManager(Context context, Metadata metadata) {
         this.context = context;
@@ -48,8 +49,13 @@ public class FocusManager implements OnAudioFocusChangeListener {
         Log.d(Utils.TAG, "Abandoning audio focus...");
 
         AudioManager manager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-        int r = manager.abandonAudioFocus(this);
-        hasAudioFocus = r != AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        if(isInterrupt){
+            isInterrupt = false;
+        }else{
+            int r = manager.abandonAudioFocus(this);
+            hasAudioFocus = r != AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        }
+
     }
 
     @Override
@@ -58,6 +64,7 @@ public class FocusManager implements OnAudioFocusChangeListener {
             case AudioManager.AUDIOFOCUS_LOSS:
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 Log.d(Utils.TAG, "Audio focus loss, triggering pause");
+                isInterrupt = true;
                 paused = true;
                 metadata.getControls().pause();
                 break;
